@@ -1,0 +1,84 @@
+version: '3.8'
+networks:
+  dock-net:
+services:
+  php-fpm:
+    build:
+      context: ./php-fpm
+    container_name: php-fpm
+    # это нужно чтобы связать php-fpm контейнер с базой в файле /etc/host
+    depends_on: #дождаться запуска database
+      - database
+    volumes:
+      - ../src:/var/www
+    networks:
+      - dock-net
+
+  nginx:
+    build:
+      context: ./nginx
+    container_name: nginx
+    volumes:
+      - ../src:/var/www
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./nginx/sites/:/etc/nginx/sites-available
+      - ./nginx/conf.d/:/etc/nginx/conf.d
+    depends_on: #дождаться запуска php-fpm
+      - php-fpm
+    ports:
+      - "8000:80"
+      - "443:443"
+    networks:
+      - dock-net
+
+  database:
+    build:
+      context: ./database
+    container_name: database
+    environment:
+      - MYSQL_DATABASE=magento2
+      - MYSQL_USER=magento2
+      - MYSQL_PASSWORD=magento2
+      - MYSQL_ROOT_PASSWORD=123456
+    volumes:
+      - ./database/data.sql:/docker-entrypoint-initdb.d/data.sql
+    networks:
+      - dock-net
+
+  elasticsearch:
+    build:
+      context: ./elasticsearch
+    container_name: elasticsearch
+    environment:
+      - discovery.type=single-node
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    networks:
+      - dock-net
+    depends_on:
+      - nginx
+    ports:
+      - 9200:9200
+    volumes:
+      - ../src/elasticsearchdata:/usr/share/elasticsearch/data
+
+  phpmyadmin:
+    build:
+      context: ./phpmyadmin
+    container_name: phpmyadmin
+#это не нужно добавлять по умолчанию    restart: always
+    links:
+      - database
+    depends_on: #дождаться запуска database
+      - nginx
+    ports:
+      - 8001:80
+    environment:
+      - PMA_ARBITRARY=1
+      - PMA_HOST=database
+      - PMA_PORT=3306
+      - MYSQL_USER=magento2
+      - MYSQL_PASSWORD=magento2
+      - MYSQL_ROOT_PASSWORD=123456
+    networks:
+      - dock-net
+
