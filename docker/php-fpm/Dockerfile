@@ -80,6 +80,8 @@ ADD php.ini /usr/local/etc/php/conf.d/40-custom.ini
 
 #RUN mkdir -p /etc/nginx/html /var/www/html \
 #  && chown -R www-data:www-data /etc/nginx /var/www /usr/local/etc/php/conf.d
+
+#RUN adduser -G www-data -u 1000 -h /var/www -s /bin/bash -S www-data
   
 #USER www-data:www-data
 
