@@ -16,4 +16,5 @@
 13. bin/magento setup:static-content:Deploy -f
 14. bin/magento indexer:reindex
 15. chmod -R 777 var/ generated/ pub/ pub/static pub/media/
- 
+16. INSERT INTO core_config_data (path, value) VALUES ('dev/static/sign', 0) ON DUPLICATE KEY UPDATE value = 0;
+17. bin/magento cache:clean config 
