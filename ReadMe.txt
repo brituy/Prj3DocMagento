@@ -15,7 +15,7 @@
 
     /admin_xqxq3u
 
-12. chown -R www-data:www-data /var
+12. chown -R www-data:www-data var pub/static pub/media
  
 13. bin/magento deploy:mode:set developer
 14. bin/magento setup:upgrade
