@@ -23,6 +23,7 @@ services:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf
       - ./nginx/sites/:/etc/nginx/sites-available
       - ./nginx/conf.d/:/etc/nginx/conf.d
+      - ./nginx/ssl:/etc/nginx/certs
     depends_on: #дождаться запуска php-fpm
       - php-fpm
     ports:

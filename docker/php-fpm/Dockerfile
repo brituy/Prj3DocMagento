@@ -1,4 +1,4 @@
-FROM php:7.4.0-fpm
+FROM php:7.4-fpm
 
 # Install System Dependencies
 RUN apt-get update && apt-get install -y \
@@ -19,10 +19,11 @@ RUN apt-get update && apt-get install -y \
         lsof \
         default-mysql-client \
         vim \
-        zip
+        zip \
+        procps
 
 # Install Magento Dependencies
-RUN docker-php-ext-configure gd --with-jpeg=/usr/include/ --with-freetype=/usr/include/
+RUN docker-php-ext-configure gd --with-freetype --with-jpeg
 
 RUN docker-php-ext-install \
     bcmath \
@@ -33,6 +34,7 @@ RUN docker-php-ext-install \
     dom \
     exif \
     gd \
+    gettext \
     iconv \
     intl \
     mbstring \
@@ -63,27 +65,23 @@ RUN apt-get install -y libssh2-1-dev \
   && ./.travis/build.sh \
   && docker-php-ext-enable ssh2
 
-# Install Composer
-RUN curl -sS https://getcomposer.org/installer | php && mv composer.phar /usr/local/bin/composer && chmod +x /usr/local/bin/composer
-
 # Install Node, NVM, NPM and Grunt
 RUN apt-get install -y gnupg \
-  && curl -sL https://deb.nodesource.com/setup_8.x | bash - \
+  && curl -sL https://deb.nodesource.com/setup_10.x | bash - \
   && apt-get install -y nodejs \
   && mkdir /var/www/.config /var/www/.npm \
   && chown www-data:www-data /var/www/.config /var/www/.npm \
-  && ln -s /var/www/html/node_modules/grunt/bin/grunt /usr/bin/grunt
+  && npm install -g grunt-cli
 
-#RUN npm install yarn -g
+#Sendmail  
+RUN curl -sSLO https://github.com/mailhog/mhsendmail/releases/download/v0.2.0/mhsendmail_linux_amd64 \
+  && chmod +x mhsendmail_linux_amd64 \
+  && mv mhsendmail_linux_amd64 /usr/local/bin/mhsendmail
 
-ADD php.ini /usr/local/etc/php/conf.d/40-custom.ini
+# Install Composer
+RUN curl -sS https://getcomposer.org/installer | php && mv composer.phar /usr/local/bin/composer && chmod +x /usr/local/bin/composer
 
-#RUN mkdir -p /etc/nginx/html /var/www/html \
-#  && chown -R www-data:www-data /etc/nginx /var/www /usr/local/etc/php/conf.d
-
-#RUN adduser -G www-data -u 1000 -h /var/www -s /bin/bash -S www-data
-  
-#USER www-data:www-data
+COPY php.ini /usr/local/etc/php/
 
 WORKDIR /var/www
 
