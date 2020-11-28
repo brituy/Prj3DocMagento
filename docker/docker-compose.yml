@@ -6,7 +6,6 @@ services:
     build:
       context: ./php-fpm
     container_name: php-fpm
-    # это нужно чтобы связать php-fpm контейнер с базой в файле /etc/host
     depends_on: #дождаться запуска database
       - database
     volumes:
